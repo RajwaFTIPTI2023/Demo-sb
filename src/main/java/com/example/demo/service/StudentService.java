@@ -4,8 +4,10 @@ import com.example.demo.domain.Student;
 import com.example.demo.domain.StudentRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -13,9 +15,10 @@ public class StudentService {
     private List<Student> students = new ArrayList<>();
 
     public StudentService() {
-        // Data awal
-        students.add(new Student("001", "Ali Ahmad", java.time.LocalDate.of(2002, 4, 1), "Jakarta"));
-        students.add(new Student("002", "Budi Santoso", java.time.LocalDate.of(2001, 8, 10), "Bandung"));
+        // Data awal (dummy)
+        students.add(new Student("001", "Ali Ahmad", LocalDate.of(2002, 4, 1), "Jakarta"));
+        students.add(new Student("002", "Budi Santoso", LocalDate.of(2001, 8, 10), "Bandung"));
+        students.add(new Student("003", "Citra Dewi", LocalDate.of(2000, 12, 25), "Surabaya"));
     }
 
     // CREATE
@@ -26,37 +29,52 @@ public class StudentService {
         return student;
     }
 
-    // READ - Get all students
+    // READ ALL
     public List<Student> getAllStudents() {
         return students;
     }
 
-    // READ - Get by NIM
+    // READ BY NIM
     public Student getStudentByNim(String nim) {
-        return students.stream()
-                .filter(s -> s.getNim().equalsIgnoreCase(nim))
-                .findFirst()
-                .orElse(null);
+        Optional<Student> studentOptional = students.stream()
+                .filter(student -> student.getNim().equalsIgnoreCase(nim))
+                .findFirst();
+
+        if (studentOptional.isPresent()) {
+            return studentOptional.get();
+        } else {
+            throw new RuntimeException("Student with nim " + nim + " not found");
+        }
     }
 
     // UPDATE
     public Student updateStudent(String nim, StudentRequest request) {
-        Student existing = getStudentByNim(nim);
-        if (existing != null) {
-            existing.setFullName(request.getFullName());
-            existing.setDob(request.getDob());
-            existing.setAddress(request.getAddress());
+        Optional<Student> studentOptional = students.stream()
+                .filter(student -> student.getNim().equalsIgnoreCase(nim))
+                .findFirst();
+
+        if (studentOptional.isPresent()) {
+            Student studentToUpdate = studentOptional.get();
+            studentToUpdate.setFullName(request.getFullName());
+            studentToUpdate.setDob(request.getDob());
+            studentToUpdate.setAddress(request.getAddress());
+            return studentToUpdate;
+        } else {
+            throw new RuntimeException("Student with nim " + nim + " not found");
         }
-        return existing;
     }
 
     // DELETE
-    public boolean deleteStudent(String nim) {
-        Student existing = getStudentByNim(nim);
-        if (existing != null) {
-            students.remove(existing);
-            return true;
+    public void deleteStudent(String nim) {
+        Optional<Student> studentOptional = students.stream()
+                .filter(student -> student.getNim().equalsIgnoreCase(nim))
+                .findFirst();
+
+        if (studentOptional.isPresent()) {
+            Student studentToBeDeleted = studentOptional.get();
+            students.remove(studentToBeDeleted);
+        } else {
+            throw new RuntimeException("Student with nim " + nim + " not found");
         }
-        return false;
     }
 }

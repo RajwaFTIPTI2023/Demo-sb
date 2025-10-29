@@ -4,7 +4,6 @@ import com.example.demo.domain.Student;
 import com.example.demo.domain.StudentRequest;
 import com.example.demo.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,44 +17,44 @@ public class StudentController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Student> createStudent(@RequestBody StudentRequest request) {
-        Student student = studentService.createStudent(request);
-        return ResponseEntity.ok(student);
+    public Student createStudent(@RequestBody StudentRequest request) {
+        return studentService.createStudent(request);
     }
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<Student>> getAllStudents() {
-        return ResponseEntity.ok(studentService.getAllStudents());
+    public List<Student> getAllStudents() {
+        return studentService.getAllStudents();
     }
 
     // READ BY NIM
     @GetMapping("/{nim}")
-    public ResponseEntity<?> getStudentByNim(@PathVariable String nim) {
-        Student student = studentService.getStudentByNim(nim);
-        if (student != null) {
-            return ResponseEntity.ok(student);
+    public Object findStudent(@PathVariable String nim) {
+        try {
+            return studentService.getStudentByNim(nim);
+        } catch (Exception e) {
+            return e.getMessage();
         }
-        return ResponseEntity.status(404).body("Student not found");
     }
 
     // UPDATE
     @PutMapping("/{nim}")
-    public ResponseEntity<?> updateStudent(@PathVariable String nim, @RequestBody StudentRequest request) {
-        Student updated = studentService.updateStudent(nim, request);
-        if (updated != null) {
-            return ResponseEntity.ok(updated);
+    public Object updateStudent(@PathVariable String nim, @RequestBody StudentRequest request) {
+        try {
+            return studentService.updateStudent(nim, request);
+        } catch (Exception e) {
+            return e.getMessage();
         }
-        return ResponseEntity.status(404).body("Student not found");
     }
 
     // DELETE
     @DeleteMapping("/{nim}")
-    public ResponseEntity<String> deleteStudent(@PathVariable String nim) {
-        boolean deleted = studentService.deleteStudent(nim);
-        if (deleted) {
-            return ResponseEntity.ok("Successfully deleted");
+    public String removeStudent(@PathVariable String nim) {
+        try {
+            studentService.deleteStudent(nim);
+            return "Successfully deleted";
+        } catch (Exception e) {
+            return e.getMessage();
         }
-        return ResponseEntity.status(404).body("Student not found");
     }
 }
